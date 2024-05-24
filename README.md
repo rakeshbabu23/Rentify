@@ -9,6 +9,7 @@ Rentify is a property management platform that allows users to register, login, 
 - [Rentify](#rentify-api)
   - [Introduction](#introduction)
   - [Table of Contents](#table-of-contents)
+  - [Deployment](#deployment)
   - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
@@ -28,6 +29,9 @@ Rentify is a property management platform that allows users to register, login, 
       - [Send Email](#send-email)
 
 
+## Deployment
+ [Deployment Link](https://master.d3g6avp78xl18j.amplifyapp.com/)
+ 
 ## Getting Started
 
 ### Prerequisites
