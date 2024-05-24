@@ -159,37 +159,44 @@ exports.expressInterest = async (req, res) => {
   }
 };
 
-// Get properties with filters
 exports.getFilteredProperties = async (req, res) => {
   try {
-    let { minPrice, maxPrice, numberOfBathrooms, numberOfBedrooms } = req.query;
+    let { minPrice, maxPrice, numberOfBathrooms, numberOfBedrooms, page } =
+      req.query;
+    minPrice =
+      minPrice !== undefined && minPrice !== "0" ? Number(minPrice) : 0;
+    maxPrice =
+      maxPrice !== undefined && maxPrice !== "0" ? Number(maxPrice) : Infinity;
+    page = page ? Number(page) : 1;
 
-    // Convert query parameters to appropriate types
-    minPrice = minPrice > 0 ? Number(minPrice) : -Infinity;
-    maxPrice = maxPrice > 0 ? Number(maxPrice) : Infinity;
+    const limit = 4;
+    const skip = (page - 1) * limit;
 
     // Construct query object
     const query = {};
 
-    if (numberOfBathrooms) {
+    // Handle numberOfBathrooms
+    if (numberOfBathrooms && numberOfBathrooms !== "0") {
       if (numberOfBathrooms === "5+") {
         query.numberOfBathrooms = { $gte: 5 };
       } else {
-        query.numberOfBathrooms = Number(numberOfBathrooms) || { $gte: 0 };
+        query.numberOfBathrooms = Number(numberOfBathrooms);
       }
     }
 
-    if (numberOfBedrooms) {
+    // Handle numberOfBedrooms
+    if (numberOfBedrooms && numberOfBedrooms !== "0") {
       if (numberOfBedrooms === "5+") {
         query.numberOfBedrooms = { $gte: 5 };
       } else {
-        query.numberOfBedrooms = Number(numberOfBedrooms) || { $gte: 0 };
+        query.numberOfBedrooms = Number(numberOfBedrooms);
       }
     }
 
-    if (minPrice !== -Infinity || maxPrice !== Infinity) {
+    // Handle price range
+    if (minPrice !== 0 || maxPrice !== Infinity) {
       query.price = {};
-      if (minPrice !== -Infinity) {
+      if (minPrice !== 0) {
         query.price.$gte = minPrice;
       }
       if (maxPrice !== Infinity) {
@@ -197,11 +204,19 @@ exports.getFilteredProperties = async (req, res) => {
       }
     }
 
-    // Fetch properties matching the query
-    const properties = await Property.find(query);
+    const properties = await Property.find(query).limit(limit).skip(skip);
+    const totalProperties = await Property.countDocuments(query);
+    const totalPages = Math.ceil(totalProperties / limit);
+
+    console.log("Fetched properties:", properties);
 
     // Send response
-    res.status(200).json({ properties });
+    res.status(200).json({
+      properties,
+      total: totalProperties,
+      page: parseInt(page),
+      pages: Math.ceil(totalProperties / limit),
+    });
   } catch (error) {
     console.error("Error fetching properties:", error);
     res.status(400).json({ error: error.message });
