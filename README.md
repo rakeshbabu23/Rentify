@@ -33,6 +33,8 @@ Rentify is a property management platform that allows users to register, login, 
 ### Prerequisites
 
 - Node.js
+- React.js
+- Express
 - npm
 - MongoDB
 
